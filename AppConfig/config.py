@@ -1,10 +1,8 @@
-from flask import Flask, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_session import Session
 import redis
-from flask_wtf import CSRFProtect
 
-app = Flask(__name__)
+from utils import create_app
+
+app = create_app()
 
 
 class Config(object):
@@ -39,10 +37,24 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = 86400  # 单位为s，session有效时间
 
 
-app.config.from_object(Config)
-# 数据库要和 app关联
-db = SQLAlchemy(app)
-# csrf保护
-CSRFProtect(app)
-# 设置session保存指定位置
-Session(app)
+# 开发环境
+class DevelopConfig(Config):
+    pass
+
+
+# 生产环境
+class ProductConfig(Config):
+    DEBUG = False
+
+
+# 测试环境
+class TestingConfig(Config):
+    TESTING = True
+
+
+# 通过统一的字典进行配置类的访问
+config_dict = {
+    "develop": DevelopConfig,
+    "product": ProductConfig,
+    "testing": TestingConfig,
+}
